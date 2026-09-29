@@ -1,3 +1,10 @@
 spring:
   application:
     name: multitenancy
+  datasource:  # main database (tenant registry)
+    url: jdbc:h2:mem:main
+    username: sa
+  jpa:
+    hibernate:
+      ddl-auto: none  # the tenant side has no database at boot, so Boot must not probe it
+    open-in-view: false

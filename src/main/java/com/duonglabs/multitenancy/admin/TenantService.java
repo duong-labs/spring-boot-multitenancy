@@ -22,7 +22,7 @@ public class TenantService {
     }
 
     public synchronized Tenant create(String code, String name) {
-        if (!code.matches("[a-z0-9_]{1,32}")) { // the code ends up in a JDBC URL
+        if (code == null || !code.matches("[a-z0-9_]{1,32}")) { // the code ends up in a JDBC URL
             throw new IllegalArgumentException("code must match [a-z0-9_]{1,32}");
         }
         if (tenantRepository.existsById(code)) {

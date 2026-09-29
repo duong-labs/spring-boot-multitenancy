@@ -53,6 +53,12 @@ class MultitenancyApplicationTests {
 				.content("{\"code\":\"dup\",\"name\":\"Dup\"}")).andExpect(status().isConflict());
 	}
 
+	@Test
+	void invalidTenantCodeIsRejected() throws Exception {
+		mvc.perform(post("/tenants").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"name\":\"No code\"}")).andExpect(status().isBadRequest());
+	}
+
 	private void createTenant(String code) throws Exception {
 		mvc.perform(post("/tenants").contentType(MediaType.APPLICATION_JSON)
 				.content("{\"code\":\"" + code + "\",\"name\":\"" + code + " inc\"}"))

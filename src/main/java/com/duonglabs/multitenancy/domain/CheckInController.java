@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Nothing here knows about tenants: the repository transparently hits the current tenant's database. */
+/** Tenant-agnostic: the repository hits whichever database TenantContext points at. */
 @RestController
 @RequestMapping("/check-ins")
 public class CheckInController {

@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-/** Business data. Lives in each tenant's own database: note there is no tenant_id column. */
+/** Business data, stored in each tenant's own database (no tenant_id column). */
 @Entity
 public class CheckIn {
     @Id

@@ -9,20 +9,20 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 import com.duonglabs.multitenancy.admin.TenantContext;
 
-/**
- * Routes every {@code getConnection()} call to the DataSource of the tenant in {@link TenantContext}.
- * Tenants can be added while the application is running.
- */
+/** Routes each connection request to the DataSource of the current tenant. Tenants can be added at runtime. */
 public class MultitenantDataSource extends AbstractRoutingDataSource {
 
-    // AbstractRoutingDataSource keeps its resolved map in a private, non-volatile field. Since
-    // tenants are added at runtime from other threads, we publish our own volatile copy and read
-    // that on the hot path.
+    // The superclass keeps its map in a private non-volatile field; this copy is safe to read across threads.
     private volatile Map<Object, DataSource> routable = Map.of();
+
+    public MultitenantDataSource() {
+        setTargetDataSources(new HashMap<>());
+        afterPropertiesSet();
+    }
 
     @Override
     protected Object determineCurrentLookupKey() {
-        return TenantContext.getCurrentTenant();
+        return TenantContext.get();
     }
 
     @Override
@@ -31,8 +31,8 @@ public class MultitenantDataSource extends AbstractRoutingDataSource {
         routable = super.getResolvedDataSources();
     }
 
-    public synchronized void addResolvedDataSource(String tenantCode, DataSource dataSource) {
-        Map<Object, Object> targets = new HashMap<>(getResolvedDataSources());
+    public synchronized void addTenant(String tenantCode, DataSource dataSource) {
+        Map<Object, Object> targets = new HashMap<>(routable);
         targets.put(tenantCode, dataSource);
         setTargetDataSources(targets);
         afterPropertiesSet();
@@ -43,16 +43,10 @@ public class MultitenantDataSource extends AbstractRoutingDataSource {
     }
 
     @Override
-    public synchronized Map<Object, DataSource> getResolvedDataSources() {
-        return super.getResolvedDataSources();
-    }
-
-    @Override
     protected DataSource determineTargetDataSource() {
-        Object key = determineCurrentLookupKey();
-        DataSource dataSource = routable.get(key);
-        if (dataSource == null) {
-            throw new IllegalStateException("Cannot determine target DataSource for tenant [" + key + "]");
+        DataSource dataSource = routable.get(determineCurrentLookupKey());
+        if (dataSource == null) { // never fall back to another tenant's database
+            throw new IllegalStateException("No DataSource for tenant " + determineCurrentLookupKey());
         }
         return dataSource;
     }

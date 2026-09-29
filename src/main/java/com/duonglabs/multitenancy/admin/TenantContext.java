@@ -1,21 +1,21 @@
 package com.duonglabs.multitenancy.admin;
 
-/** Holds the tenant code of the request being handled by the current thread. */
+/** The tenant of the request running on the current thread. */
 public final class TenantContext {
-    private static final ThreadLocal<String> CURRENT_TENANT = new ThreadLocal<>();
+    private static final ThreadLocal<String> CURRENT = new ThreadLocal<>();
 
     private TenantContext() {
     }
 
-    public static String getCurrentTenant() {
-        return CURRENT_TENANT.get();
+    public static String get() {
+        return CURRENT.get();
     }
 
-    public static void setCurrentTenant(String tenantCode) {
-        CURRENT_TENANT.set(tenantCode);
+    public static void set(String tenantCode) {
+        CURRENT.set(tenantCode);
     }
 
     public static void clear() {
-        CURRENT_TENANT.remove();
+        CURRENT.remove();
     }
 }
